@@ -1,18 +1,18 @@
 const express = require('express');
 const app = express();
+const adminAuth = require('./middlewares/auth');
 app.get('/test', (req, res) => {
     res.send('Hello World!');
 }
 );
-app.post('/test', (req, res) => {
-    res.send('Hello World!');
+app.use("/admin",adminAuth);
+app.get('/admin/dashboard', (req, res) => {
+    res.send('Welcome to the admin dashboard!');
 });
-app.use("/tests", (req, res) => {
-    res.send("Hello World hi man ");
+app.get('/admin/settings', (req, res) => {
+    res.send('Welcome to the admin settings!');
 });
-app.delete('/testdelete', (req, res) => {
-    res.send('Hello World! Delete');
-});
+
 app.listen(3000, () => {console.log('Server is running on port 3000');   
 });
   
