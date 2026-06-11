@@ -2,16 +2,26 @@ const express = require('express');
 const connectDB =require('./config/database');
 const app = express();
 const User = require('./models/user');
+const {validateSignUpData} = require('./utils/validation');
+const bcrypt = require('bcrypt');
 app.use(express.json());
 app.post("/signup", async (req, res) => {
     // creating a new instance of the User model with the user data
-    const user = new User(req.body);
-    try {        await user.save();
+    
+    try {
+        validateSignUpData(req.body);
+        // encrypting the password
+        const {firstName, lastName, emailID, password} = req.body;
+        const passwordhash = await bcrypt.hash(password, 10);
+        const user = new User({firstName, lastName, emailID, password: passwordhash});
+        await user.save();
         res.send({message:"User created successfully"});
     } catch (error) {
-        console.error("Error creating user", error);    
-        res.status(500).send({message:"Error creating user"});
-    }
+    console.error(error);
+    res.status(400).send({
+        message: error.message
+    });
+}h 
 });
 // get user by email
 app.get("/user", async (req, res) => {
@@ -70,11 +80,32 @@ app.patch("/update", async (req, res) => {
         console.error("Error updating user", error);
         res.status(500).send({message:"Error updating user"});
     }
-
+});
+app.post("/login", async (req, res) => {
+    
+    try {
+        const {emailID, password} = req.body;
+        const user = await User.findOne({ emailID: emailID });
+        if (!user) {
+            throw new Error("User not found email is not present in DB");
+        }
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (isPasswordValid) {
+            res.send({message:"Login successful"});
+        }
+        else {
+            throw new Error("Invalid credentials");
+        }
+    }
+    catch (error) {
+    res.status(400).send({
+        message: error.message
+    });
+}
 });
 
 connectDB().then(() => {
-    console.log("Connected to MongoDB");
+    console.log("Connected to MongoDB");  
     app.listen(3000, () => {console.log('Server is running on port 3000');   
 });
 }).catch((err) => { 
