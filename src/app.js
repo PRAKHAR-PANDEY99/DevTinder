@@ -54,17 +54,23 @@ app.delete("/delete", async (req, res) => {
 app.patch("/update", async (req, res) => {
     const userID = req.body.userID;
     const updates = req.body.updates;
-
     try {
-        const user = await User.findByIdAndUpdate(userID, updates, { new: true });
+    const ALLOWED_UPDATES = ["password", "age", "gender", "photoUrl", "about", "skills"];
+    const isUpdateAllowed = Object.keys(updates).every((update) => ALLOWED_UPDATES.includes(update));
+    if (!isUpdateAllowed) {
+       throw new Error("Invalid updates! Only password, age, gender, photoUrl, about, and skills can be updated.");     
+    } 
+        const user = await User.findByIdAndUpdate(userID, updates, { returnDocument: "after", runValidators: true });
+        console.log("Updated user:", user);
         if (!user) {
             return res.status(404).send({message:"User not found"});
         }
-        res.send({message:"User updated successfully", user});
+        res.send({message:"User updated successfully"});
     } catch (error) {
         console.error("Error updating user", error);
         res.status(500).send({message:"Error updating user"});
     }
+
 });
 
 connectDB().then(() => {

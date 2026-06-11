@@ -1,35 +1,74 @@
 const mongoose = require('mongoose');
 const userSchema = new mongoose.Schema({
-    firstName: { type: String, required: true, trim: true, minlength: 2, maxlength: 50 },
-
-    lastName: { type: String, required: true, trim: true, minlength: 2, maxlength: 50 },
-
-    emailID: { type: String, required: true, unique: true, lowercase: true, trim: true },
-
-    password: { type: String, required: true, minlength: 8 },
-
-    age: { type: Number, min: 12, max: 100 },
-
-    gender: {
+    firstName: {
         type: String,
+        required: true,
+        trim: true,
+        minlength: 2,
+        maxlength: 50
+    },
+
+    lastName: {
+        type: String,
+        required: true,
+        trim: true,
+        minlength: 2,
+        maxlength: 50
+    },
+
+    emailID: {
+        type: String,
+        required: true,
+        unique: true,
         lowercase: true,
+        trim: true,
         validate(value) {
-            if (!["male", "female", "other"].includes(value)) {
-                throw new Error("Invalid gender");
+            if (!validator.isEmail(value)) {
+                throw new Error("Invalid Email Address");
             }
         }
     },
 
+    password: {
+        type: String,
+        required: true,
+        minlength: 8,
+        validate(value) {
+            if (!validator.isStrongPassword(value)) {
+                throw new Error(
+                    "Password must contain uppercase, lowercase, number and special character"
+                );
+            }
+        }
+    },
+
+    age: {
+        type: Number,
+        min: 12,
+        max: 100
+    },
+
+    gender: {
+        type: String,
+        lowercase: true,
+        enum: ["male", "female", "other"]
+    },
+
     photoUrl: {
         type: String,
-        default: "https://www.pngall.com/wp-content/uploads/5/Profile-PNG-High-Quality-Image.png"
+        default: "https://www.pngall.com/wp-content/uploads/5/Profile-PNG-High-Quality-Image.png",
+        validate(value) {
+            if (!validator.isURL(value)) {
+                throw new Error("Invalid Photo URL");
+            }
+        }
     },
 
     about: {
         type: String,
-        default: "Hello! I'm new to DevTinder. Looking forward to connecting with fellow developers!",
+        trim: true,
         maxlength: 500,
-        trim: true
+        default: "Hello! I'm new to DevTinder."
     },
 
     skills: {
@@ -40,7 +79,9 @@ const userSchema = new mongoose.Schema({
             }
         }
     }
-}, { timestamps: true });
+}, {
+    timestamps: true
+});
 // const User= mongoose.model("User", userSchema);
 // module.exports = User;
 module.exports = mongoose.model("User", userSchema);
