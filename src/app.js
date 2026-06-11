@@ -4,6 +4,11 @@ const app = express();
 const User = require('./models/user');
 const {validateSignUpData} = require('./utils/validation');
 const bcrypt = require('bcrypt');
+const cookieParser=require("cookie-parser");
+const jwt=require("jsonwebtoken")
+const userAuth  = require("./middlewares/auth");
+
+app.use(cookieParser());
 app.use(express.json());
 app.post("/signup", async (req, res) => {
     // creating a new instance of the User model with the user data
@@ -38,7 +43,7 @@ app.get("/user", async (req, res) => {
         console.error("Error finding user", error);
         res.status(500).send({message:"Error finding user"});
     }
-});
+}); 
 app.get("/feed",async (req, res) => {
     try {
         const users = await User.find({});
@@ -91,6 +96,9 @@ app.post("/login", async (req, res) => {
         }
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (isPasswordValid) {
+            const token= await jwt.sign({_id:user._id},"PrakharDev");
+            console.log(token);
+            res.cookie("token",token);
             res.send({message:"Login successful"});
         }
         else {
@@ -103,6 +111,21 @@ app.post("/login", async (req, res) => {
     });
 }
 });
+app.get("/profile", userAuth, async (req, res) => {
+    try{
+    // validate my token
+    console.log("Logged in user id "+ _id);
+    const user= req.user;
+    res.send(user);
+}
+    catch (error) {
+    res.status(400).send({
+        message: error.message
+    });
+}
+
+});
+   
 
 connectDB().then(() => {
     console.log("Connected to MongoDB");  
