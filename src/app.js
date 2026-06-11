@@ -38,6 +38,20 @@ app.get("/feed",async (req, res) => {
         res.status(500).send({message:"Error finding users"});
     }
 });
+app.delete("/delete", async (req, res) => {
+    const userrID = req.body.userID;
+    try {        const user = await User.findByIdAndDelete(userrID);
+        if(!user) {
+            return res.status(404).send({message:"User not found"});
+        }
+        res.send({message:"User deleted successfully"});
+    }
+    catch (error) {
+        console.error("Error deleting user", error);
+        res.status(500).send({message:"Error deleting user"});
+    }   
+});
+
 connectDB().then(() => {
     console.log("Connected to MongoDB");
     app.listen(3000, () => {console.log('Server is running on port 3000');   
