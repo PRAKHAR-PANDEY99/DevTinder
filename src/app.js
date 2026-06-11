@@ -13,6 +13,31 @@ app.post("/signup", async (req, res) => {
         res.status(500).send({message:"Error creating user"});
     }
 });
+// get user by email
+app.get("/user", async (req, res) => {
+    const emailID = req.body.emailID;
+    try {
+        const user = await User.find({ emailID: emailID });
+        if(user.length === 0) {
+            return res.status(404).send({message:"User not found"});
+        }
+        else {
+        res.send(user);
+        }
+    } catch (error) {
+        console.error("Error finding user", error);
+        res.status(500).send({message:"Error finding user"});
+    }
+});
+app.get("/feed",async (req, res) => {
+    try {
+        const users = await User.find({});
+        res.send(users);
+    } catch (error) {
+        console.error("Error finding users", error);
+        res.status(500).send({message:"Error finding users"});
+    }
+});
 connectDB().then(() => {
     console.log("Connected to MongoDB");
     app.listen(3000, () => {console.log('Server is running on port 3000');   
