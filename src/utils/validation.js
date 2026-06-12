@@ -9,7 +9,13 @@ const validateSignUpData=(req)=>{
     else if(!validator.isStrongPassword(req.password)){
         throw new Error("Password must contain uppercase, lowercase, number and special character");
     }
-}
+};
+const validateEditProfileData=(req)=>{
+    const allowedEditFields=["firstName","lastName","age","gender","skills","about","emailID","photoUrl"]
+    const isEditAllowed=Object.keys(req.body).every(field=>allowedEditFields.includes(field));
+    return isEditAllowed;
+} ;
 module.exports={
-    validateSignUpData
+    validateSignUpData,
+    validateEditProfileData
 }   
