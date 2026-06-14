@@ -6,7 +6,6 @@ const jwt=require("jsonwebtoken")
 const {validateSignUpData} = require('../utils/validation');
 authRouter.post("/signup", async (req, res) => {
     // creating a new instance of the User model with the user data
-    
     try {
         validateSignUpData(req.body);
         // encrypting the password
