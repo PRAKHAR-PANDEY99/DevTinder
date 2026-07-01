@@ -32,7 +32,6 @@ authRouter.post("/login", async (req, res) => {
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (isPasswordValid) {
             const token= await jwt.sign({_id:user._id},"PrakharDev");
-            console.log(token);
             res.cookie("token",token);
             res.send({message:"Login successful"});
         }
